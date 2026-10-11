@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 from pydantic import BaseModel
-from utils.save_to_document import save_document
+# from utils.save_to_document import save_to_document
 import os
 import datetime
 from dotenv import load_dotenv
