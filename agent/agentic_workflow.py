@@ -9,6 +9,15 @@ from tools.currency_conversion_tool import CurrencyConverterTool
 
 class GraphBuilder():
     def __init__(self):
+        self.model_loader = ModelLoader()
+        self.llm_with_tools = self.model_loader.load_llm()
+        self.system_prompt = SYSTEM_PROMPT
+        self.tools = [
+            WeatherInfoTool(),
+            PlaceSearchTool(),
+            CalculatorTool(),
+            CurrencyConverterTool()
+        ]
         
 
     def agent_function(self,state: MessagesState):
