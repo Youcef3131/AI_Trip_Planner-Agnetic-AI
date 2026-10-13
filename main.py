@@ -2,7 +2,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.responses import JSONResponse
 from pydantic import BaseModel
-# from utils.save_to_document import save_to_document
+from utils.save_to_document import save_document
 import os
 import datetime
 from dotenv import load_dotenv
@@ -37,8 +37,8 @@ async def query_travel_agent(query:QueryRequest):
             f.write(png_graph)
 
         print(f"Graph saved as 'my_graph.png' in {os.getcwd()}")
-        # Assuming request is a pydantic object like: {"question": "your text"}
-        messages={"messages": [query.question]}
+        # Assuming request is a pydantic object like: {"query": "your text"}
+        messages={"messages": [query.query]}
         output = react_app.invoke(messages)
 
         # If result is dict with messages:

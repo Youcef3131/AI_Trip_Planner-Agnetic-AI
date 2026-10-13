@@ -2,6 +2,7 @@
 from utils.model_loader import ModelLoader
 from prompt_library.prompt import SYSTEM_PROMPT
 from langgraph.graph import StateGraph, MessagesState, END, START
+from langchain_core.messages import HumanMessage
 from langgraph.prebuilt import ToolNode, tools_condition
 from tools.weather_info_tool import WeatherInfoTool
 from tools.place_search_tool import PlaceSearchTool
@@ -35,8 +36,35 @@ class GraphBuilder():
     def agent_function(self,state: MessagesState):
         """Main agent function"""
         user_question = state["messages"]
+        for message in reversed(user_question):
+            if isinstance(message, HumanMessage):
+                request = message.content
+                if isinstance(request, str):
+                    self.place_search_tools.last_user_request = request
+                break
         input_question = [self.system_prompt] + user_question
         response = self.llm_with_tools.invoke(input_question)
+        for tool_call in response.tool_calls:
+            if tool_call["name"] in {
+                "search_attractions",
+                "search_restaurants",
+                "search_activities",
+                "search_transportation",
+            }:
+                args = tool_call.get("args") or {}
+                place = args.get("location") or args.get("city") or args.get("query")
+                if place:
+                    tool_call["args"] = {
+                        "location": place,
+                        "city": None,
+                        "query": None,
+                    }
+                else:
+                    tool_call["args"] = {
+                        "location": self.place_search_tools.last_user_request,
+                        "city": None,
+                        "query": None,
+                    }
         return {"messages": [response]}
     def build_graph(self):
         graph_builder=StateGraph(MessagesState)
